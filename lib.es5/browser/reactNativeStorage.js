@@ -1,0 +1,38 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _reactNative = require("react-native");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ReactNativeStorage = function () {
+  function ReactNativeStorage() {
+    _classCallCheck(this, ReactNativeStorage);
+  }
+
+  _createClass(ReactNativeStorage, [{
+    key: "setItem",
+    value: function setItem(key, value, cb) {
+      _reactNative.AsyncStorage.setItem(key, value, cb);
+    }
+  }, {
+    key: "getItem",
+    value: function getItem(key, cb) {
+      _reactNative.AsyncStorage.getItem(key, cb);
+    }
+  }, {
+    key: "removeItem",
+    value: function removeItem(key, cb) {
+      _reactNative.AsyncStorage.removeItem(key, cb);
+    }
+  }]);
+
+  return ReactNativeStorage;
+}();
+
+exports.default = ReactNativeStorage;
