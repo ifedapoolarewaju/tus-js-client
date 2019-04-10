@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.canStoreURLs = undefined;
+exports.FileStorage = exports.canStoreURLs = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* eslint no-unused-vars: 0 */
 
@@ -25,12 +25,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var canStoreURLs = exports.canStoreURLs = true;
+var defaultStoragePath = path.join(process.cwd(), "tus-url-storage.json");
 
-var FileStorage = function () {
+var FileStorage = exports.FileStorage = function () {
   function FileStorage(filePath) {
     _classCallCheck(this, FileStorage);
 
-    this.path = filePath || path.join(process.cwd(), 'tus-url-storage.json');
+    this.path = filePath || defaultStoragePath;
   }
 
   _createClass(FileStorage, [{
@@ -38,7 +39,7 @@ var FileStorage = function () {
     value: function setItem(key, value, cb) {
       var _this = this;
 
-      lockfile.lock(this.path).then(function (release) {
+      lockfile.lock(this.path, this._lockfileOptions).then(function (release) {
         cb = _this._releaseAndCb(release, cb);
         _this._getData(function (err, data) {
           if (err) {
@@ -50,7 +51,7 @@ var FileStorage = function () {
             return cb(err);
           });
         });
-      });
+      }).catch(cb);
     }
   }, {
     key: "getItem",
@@ -67,7 +68,7 @@ var FileStorage = function () {
     value: function removeItem(key, cb) {
       var _this2 = this;
 
-      lockfile.lock(this.path).then(function (release) {
+      lockfile.lock(this.path, this._lockfileOptions).then(function (release) {
         cb = _this2._releaseAndCb(release, cb);
         _this2._getData(function (err, data) {
           if (err) {
@@ -79,7 +80,7 @@ var FileStorage = function () {
             return cb(err);
           });
         });
-      });
+      }).catch(cb);
     }
   }, {
     key: "_releaseAndCb",
@@ -102,9 +103,9 @@ var FileStorage = function () {
     key: "_writeData",
     value: function _writeData(data, cb) {
       var opts = {
-        encoding: 'utf8',
+        encoding: "utf8",
         mode: 438,
-        flag: 'w'
+        flag: "w"
       };
       (0, _fs.writeFile)(this.path, JSON.stringify(data), opts, function (err) {
         return cb(err);
@@ -113,10 +114,10 @@ var FileStorage = function () {
   }, {
     key: "_getData",
     value: function _getData(cb) {
-      (0, _fs.readFile)(this.path, 'utf8', function (err, data) {
+      (0, _fs.readFile)(this.path, "utf8", function (err, data) {
         if (err) {
           // return empty data if file does not exist
-          err.code === 'ENOENT' ? cb(null, {}) : cb(err);
+          err.code === "ENOENT" ? cb(null, {}) : cb(err);
           return;
         } else {
           data = !data.trim().length ? {} : JSON.parse(data);
@@ -124,11 +125,22 @@ var FileStorage = function () {
         }
       });
     }
+  }, {
+    key: "_lockfileOptions",
+    get: function get() {
+      return {
+        realpath: false,
+        retries: {
+          retries: 5,
+          minTimeout: 20
+        }
+      };
+    }
   }]);
 
   return FileStorage;
 }();
 
-function getStorage(callback) {
-  callback(null, new FileStorage());
+function getStorage() {
+  return new FileStorage();
 }
