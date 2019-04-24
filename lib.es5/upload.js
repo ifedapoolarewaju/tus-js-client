@@ -52,7 +52,8 @@ var defaultOptions = {
   retryDelays: null,
   removeFingerprintOnSuccess: false,
   uploadLengthDeferred: false,
-  urlStorage: null
+  urlStorage: null,
+  fileReader: null
 };
 
 var Upload = function () {
@@ -124,7 +125,8 @@ var Upload = function () {
       if (this._source) {
         this._start(this._source);
       } else {
-        (0, _source.getSource)(file, this.options.chunkSize, function (err, source) {
+        var fileReader = this.options.fileReader || _source.getSource;
+        fileReader(file, this.options.chunkSize, function (err, source) {
           if (err) {
             _this._emitError(err);
             return;
